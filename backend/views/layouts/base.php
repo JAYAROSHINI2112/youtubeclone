@@ -22,14 +22,15 @@ AppAsset::register($this);
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <?php $this->registerCsrfMetaTags() ?>
     <title><?= Html::encode($this->title) ?></title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.css"rel="stylesheet">
     <?php $this->head() ?>
+    
 </head>
 <body>
 <?php $this->beginBody() ?>
 
 <div class="wrap h-100 d-flex flex-column">
     <?php echo $this->render('_header') ?>
-   
     <div class="content-wrapper p-3">
         
         <?= Alert::widget() ?>

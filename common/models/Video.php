@@ -63,7 +63,9 @@ class Video extends \yii\db\ActiveRecord
             [['title', 'tags', 'video_name'], 'string', 'max' => 512],
             [['video_id'], 'unique'],
             ['has_thumbnail', 'default', 'value' => 0],
+            ['thumbnail','image','minWidth'=>1280],
             ['status', 'default', 'value' => self::STATUS_UNLISTED],
+            ['video', 'file', 'extensions' => ['mp4']],
             [['created_by'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['created_by' => 'id']],
         ];
     }
@@ -142,13 +144,23 @@ class Video extends \yii\db\ActiveRecord
                 FileHelper::createDirectory(dirname($thumbnailPath));
             }
             $this->thumbnail->saveAs($thumbnailPath);
+            Image::getImagine()
+            ->open($thumbnailPath)
+            ->thumbnail(new Box(1280, 1280))
+            ->save();
             
         }
 
         return true;
     
     }
-    
+    public function getThumbnailLink()
+    {
+        return $this->has_thumbnail ?
+            Yii::$app->params['frontendUrl'] . 'storage/thumbs/' . $this->video_id . '.jpg'
+            : '';
+    }
+
     public function getVideoLink()
     {
         return Yii::$app->params['frontendUrl'] . 'storage/videos/' . $this->video_id . '.mp4';

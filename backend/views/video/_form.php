@@ -18,6 +18,7 @@ use yii\bootstrap4\ActiveForm;
 
     <div class="row">
         <div class="col-sm-8">
+        <?php echo $form->errorSummary($model) ?>
 
             <?php echo $form->errorSummary($model) ?>
 
@@ -46,7 +47,7 @@ use yii\bootstrap4\ActiveForm;
                        poster="<?php echo $model->getThumbnailLink() ?>"
                        src="<?php echo $model->getVideoLink() ?>"
                        controls></video>
-            </div>
+            </div> 
 
             <div class="mb-3">
                 <div class="text-muted">Video Link</div>

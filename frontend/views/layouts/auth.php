@@ -16,10 +16,8 @@ AppAsset::register($this);
 ?>
 
 
-
     <main class="d-flex"style="flex:1;">
-    <?php echo $this->render('_sidebar') ?>
-    <div class="content-wrapper p-3">
+     <div class="content-wrapper p-3">
         
         <?= Alert::widget() ?>
         <?= $content ?>

@@ -12,33 +12,44 @@ use yii\imagine\Image;
 /**
  * This is the model class for table "{{%video}}".
  *
- * @property string $video_id
- * @property string $title
+ * @property string      $video_id
+ * @property string      $title
  * @property string|null $description
  * @property string|null $tags
- * @property int|null $status
- * @property int|null $has_thumbnail
+ * @property int|null    $status
+ * @property int|null    $has_thumbnail
  * @property string|null $video_name
- * @property int|null $created_at
- * @property int|null $updated_at
- * @property int|null $created_by
+ * @property int|null    $created_at
+ * @property int|null    $updated_at
+ * @property int|null    $created_by
  *
- * @property User $createdBy
+ * @property User        $createdBy
+ * @property \common\models\VideoLike[]        $likes
+ * @property \common\models\VideoLike[]        $dislikes
  */
 class Video extends \yii\db\ActiveRecord
 {
     const STATUS_UNLISTED = 0;
     const STATUS_PUBLISHED = 1;
 
-     public $video;
+    /**
+     * @var \yii\web\UploadedFile
+     */
+    public $video;
+
+    /**
+     * @var \yii\web\UploadedFile
+     */
+    public $thumbnail;
+
     /**
      * {@inheritdoc}
      */
-    public $thumbnail;
     public static function tableName()
     {
         return '{{%video}}';
     }
+
     public function behaviors()
     {
         return [
@@ -48,13 +59,13 @@ class Video extends \yii\db\ActiveRecord
                 'updatedByAttribute' => false
             ]
         ];
-        }
+    }
 
     /**
      * {@inheritdoc}
      */
     public function rules()
-       {
+    {
         return [
             [['video_id', 'title'], 'required'],
             [['description'], 'string'],
@@ -63,20 +74,12 @@ class Video extends \yii\db\ActiveRecord
             [['title', 'tags', 'video_name'], 'string', 'max' => 512],
             [['video_id'], 'unique'],
             ['has_thumbnail', 'default', 'value' => 0],
-            ['thumbnail','image','minWidth'=>1280],
             ['status', 'default', 'value' => self::STATUS_UNLISTED],
+            ['thumbnail', 'image', 'minWidth' => 1280],
             ['video', 'file', 'extensions' => ['mp4']],
             [['created_by'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['created_by' => 'id']],
         ];
     }
-    public function getStatusLabels()
-    {
-        return [
-            self::STATUS_UNLISTED => 'Unlisted',
-            self::STATUS_PUBLISHED => 'Published',
-        ];
-    }
-
 
     /**
      * {@inheritdoc}
@@ -94,7 +97,15 @@ class Video extends \yii\db\ActiveRecord
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
             'created_by' => 'Created By',
-            'thumbnail' =>  'Thumbnail'
+            'thumbnail' => 'Thumbnail'
+        ];
+    }
+
+    public function getStatusLabels()
+    {
+        return [
+            self::STATUS_UNLISTED => 'Unlisted',
+            self::STATUS_PUBLISHED => 'Published',
         ];
     }
 
@@ -109,6 +120,40 @@ class Video extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getViews()
+    {
+        return $this->hasMany(VideoView::class, ['video_id' => 'video_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLikes()
+    {
+        return $this->hasMany(VideoLike::class, ['video_id' => 'video_id'])
+            ->liked();
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getDislikes()
+    {
+        return $this->hasMany(VideoLike::class, ['video_id' => 'video_id'])
+            ->disliked();
+    }
+
+    /**
+     * @return \common\models\query\CommentQuery
+     */
+    public function getComments()
+    {
+        return $this->hasMany(Comment::class, ['video_id' => 'video_id']);
+    }
+
+    /**
      * {@inheritdoc}
      * @return \common\models\query\VideoQuery the active query used by this AR class.
      */
@@ -116,6 +161,7 @@ class Video extends \yii\db\ActiveRecord
     {
         return new \common\models\query\VideoQuery(get_called_class());
     }
+
     public function save($runValidation = true, $attributeNames = null)
     {
         $isInsert = $this->isNewRecord;
@@ -145,15 +191,19 @@ class Video extends \yii\db\ActiveRecord
             }
             $this->thumbnail->saveAs($thumbnailPath);
             Image::getImagine()
-            ->open($thumbnailPath)
-            ->thumbnail(new Box(1280, 1280))
-            ->save();
-            
+                ->open($thumbnailPath)
+                ->thumbnail(new Box(1280, 1280))
+                ->save();
         }
 
         return true;
-    
     }
+
+    public function getVideoLink()
+    {
+        return Yii::$app->params['frontendUrl'] . 'storage/videos/' . $this->video_id . '.mp4';
+    }
+
     public function getThumbnailLink()
     {
         return $this->has_thumbnail ?
@@ -161,8 +211,21 @@ class Video extends \yii\db\ActiveRecord
             : '';
     }
 
-    public function getVideoLink()
+    public function afterDelete()
     {
-        return Yii::$app->params['frontendUrl'] . 'storage/videos/' . $this->video_id . '.mp4';
-    } 
+        parent::afterDelete();
+        $videoPath = Yii::getAlias('@frontend/web/storage/videos/' . $this->video_id . '.mp4');
+        unlink($videoPath);
+
+        $thumbnailPath = Yii::getAlias('@frontend/web/storage/thumbs/' . $this->video_id . '.jpg');
+        if (file_exists($thumbnailPath)) {
+            unlink($thumbnailPath);
+        }
+    }
+
+    
+    public function belongsTo($userId)
+    {
+        return $this->created_by === $userId;
+    }
 }

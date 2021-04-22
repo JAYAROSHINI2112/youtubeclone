@@ -3,16 +3,16 @@
 namespace backend\controllers;
 
 use Yii;
-use common\models\video;
+use common\models\Video;
 use yii\data\ActiveDataProvider;
+use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\UploadedFile;
 
-
 /**
- * VideoController implements the CRUD actions for video model.
+ * VideoController implements the CRUD actions for Video model.
  */
 class VideoController extends Controller
 {
@@ -22,6 +22,15 @@ class VideoController extends Controller
     public function behaviors()
     {
         return [
+            'access' => [
+                'class' => AccessControl::class,
+                'rules' => [
+                    [
+                        'allow' => true,
+                        'roles' => ['@']
+                    ]
+                ]
+            ],
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
@@ -32,13 +41,16 @@ class VideoController extends Controller
     }
 
     /**
-     * Lists all video models.
+     * Lists all Video models.
+     *
      * @return mixed
      */
     public function actionIndex()
     {
         $dataProvider = new ActiveDataProvider([
-            'query' => video::find(),
+            'query' => Video::find()
+                ->creator(Yii::$app->user->id)
+                ->latest(),
         ]);
 
         return $this->render('index', [
@@ -47,21 +59,9 @@ class VideoController extends Controller
     }
 
     /**
-     * Displays a single video model.
-     * @param string $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionView($id)
-    {
-        return $this->render('view', [
-            'model' => $this->findModel($id),
-        ]);
-    }
-
-    /**
-     * Creates a new video model.
+     * Creates a new Video model.
      * If creation is successful, the browser will be redirected to the 'view' page.
+     *
      * @return mixed
      */
     public function actionCreate()
@@ -78,10 +78,10 @@ class VideoController extends Controller
         ]);
     }
 
-
     /**
-     * Updates an existing video model.
+     * Updates an existing Video model.
      * If update is successful, the browser will be redirected to the 'view' page.
+     *
      * @param string $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
@@ -100,13 +100,15 @@ class VideoController extends Controller
         ]);
     }
 
-
     /**
-     * Deletes an existing video model.
+     * Deletes an existing Video model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
+     *
      * @param string $id
      * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     * @throws \yii\web\NotFoundHttpException if the model cannot be found
      */
     public function actionDelete($id)
     {
@@ -116,15 +118,16 @@ class VideoController extends Controller
     }
 
     /**
-     * Finds the video model based on its primary key value.
+     * Finds the Video model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
+     *
      * @param string $id
-     * @return video the loaded model
+     * @return Video the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = video::findOne($id)) !== null) {
+        if (( $model = Video::findOne($id) ) !== null) {
             return $model;
         }
 

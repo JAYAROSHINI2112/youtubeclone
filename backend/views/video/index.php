@@ -30,18 +30,28 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             ],
             [
-                'attribute' => 'title',
+                'attribute' => 'status',
                 'content' => function ($model) {
-                    return $model->getStatusLabels()[$model-> status];
+                    return $model->getStatusLabels()[$model->status];
                 }
-            ],  
+            ],
             //'has_thumbnail',
             //'video_name',
             'created_at:datetime',
             'updated_at:datetime',
             //'created_by',
 
-            ['class' => 'yii\grid\ActionColumn'],
+            [
+                'class' => 'yii\grid\ActionColumn',
+                'buttons' => [
+                    'delete' => function ($url) {
+                        return Html::a('Delete', $url, [
+                            'data-method' => 'post',
+                            'data-confirm' => 'Are you sure?'
+                        ]);
+                    }
+                ]
+            ],
         ],
     ]); ?>
 

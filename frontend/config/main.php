@@ -8,6 +8,7 @@ $params = array_merge(
 
 return [
     'id' => 'app-frontend',
+    'defaultRoute' => '/video/index',
     'name' => 'YoutubeClone',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],

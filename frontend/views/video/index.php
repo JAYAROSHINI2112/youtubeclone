@@ -1,49 +1,19 @@
 <?php
 
-use yii\helpers\Html;
-use yii\grid\GridView;
+/** @var $this \yii\web\View */
+/** @var $dataProvider \yii\data\ActiveDataProvider */
 
-/* @var $this yii\web\View */
-/* @var $dataProvider yii\data\ActiveDataProvider */
-
-$this->title = 'Videos';
-$this->params['breadcrumbs'][] = $this->title;
+$this->title = 'Popular videos | '. Yii::$app->name;
 ?>
-<div class="video-index">
 
-    <h1><?= Html::encode($this->title) ?></h1>
-
-    <p>
-        <?= Html::a('Create Video', ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
-
-
-    <?= GridView::widget([
-        'dataProvider' => $dataProvider,
-        'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
-
-            [
-                'attribute' => 'title',
-                'content' => function ($model) {
-                    return $this->render('_video_item', ['model' => $model]);
-                }
-            ],
-            [
-                'attribute' => 'title',
-                'content' => function ($model) {
-                    return $model->getStatusLabels()[$model-> status];
-                }
-            ],  
-            //'has_thumbnail',
-            //'video_name',
-            'created_at:datetime',
-            'updated_at:datetime',
-            //'created_by',
-
-            ['class' => 'yii\grid\ActionColumn'],
-        ],
-    ]); ?>
-
-
-</div>
+<?php echo \yii\widgets\ListView::widget([
+    'dataProvider' => $dataProvider,
+    'pager' => [
+        'class' => \yii\bootstrap4\LinkPager::class,
+    ],
+    'itemView' => '_video_item',
+    'layout' => '<div class="d-flex flex-wrap">{items}</div>{pager}',
+    'itemOptions' => [
+        'tag' => false
+    ]
+]) ?>

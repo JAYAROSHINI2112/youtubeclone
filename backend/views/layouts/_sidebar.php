@@ -6,12 +6,12 @@
     ],
     'items' => [
         [
-            'label' => 'Home',
+            'label' => 'Dashboard',
             'url'  => ['/site/index']
         ],
         [
-            'label' => 'History',
-            'url'  => ['/video/history']
+            'label' => 'Videos',
+            'url' => ['/video/index']
         ]
         ]
 ]) ?>

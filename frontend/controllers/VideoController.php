@@ -38,6 +38,20 @@ class VideoController extends Controller
             'dataProvider' => $dataProvider
         ]);
     }
+   
 
+    public function actionView($id)
+    {
+       $this->layout = "auth";
+        $video =Video::findOne($id);
+        if(!$video){
+            throw new NotFoundHttpException("Video doesnot exit");
+        }
+      return $this->render('view',[
+          'model' => $video
+      ]);
+
+       
+    }
     
 }

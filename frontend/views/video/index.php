@@ -1,8 +1,4 @@
 <?php
-
-/** @var $this \yii\web\View */
-/** @var $dataProvider \yii\data\ActiveDataProvider */
-
 $this->title = 'Popular videos | '. Yii::$app->name;
 ?>
 

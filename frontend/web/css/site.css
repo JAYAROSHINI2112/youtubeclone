@@ -58,3 +58,6 @@ aside .nav-pills .nav-link.active{
 .comment-wrapper .dropdown-toggle::after {
     content: none;
 }
+.content-wrapper{
+    margin-bottom: 200px;
+}
